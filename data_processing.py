@@ -13,6 +13,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn import preprocessing
 #practical
 
 gender_df = pd.read_csv('datasets//gender_submission.csv')
@@ -57,7 +58,48 @@ def fill_missing_age(row):
 
 train_df['Age'] = train_df.apply(fill_missing_age,axis=1)
 train_df.hist()
-scatter_matrix(train_df)
+#scatter_matrix(train_df)
 
 pipe = make_pipeline(StandardScaler(),LogisticRegression()
 )
+y_train = pd.DataFrame()
+y_train['Survived'] = train_df['Survived']
+x_train = pd.DataFrame()
+x_train = train_df
+x_train=x_train.drop('Survived', axis=1)
+
+#le = preprocessing.LabelEncoder()# need to transform strings to int
+#x_train['Sex']=le.fit(x_train['Sex'])
+def df_encoder(column,df):
+  le = preprocessing.LabelEncoder()
+  le.fit(df[column])
+  df[column] = le.transform(df[column])
+
+df_encoder('Sex',x_train)
+df_encoder('Name',x_train)
+df_encoder('Ticket',x_train)
+df_encoder('Cabin',x_train)
+df_encoder('Embarked',x_train)
+
+x_test = pd.read_csv('datasets//test.csv')
+x_test['Age'] = x_test.apply(fill_missing_age,axis=1)
+df_encoder('Sex',x_test)
+df_encoder('Name',x_test)
+df_encoder('Ticket',x_test)
+df_encoder('Cabin',x_test)
+df_encoder('Embarked',x_test)
+y_test = pd.DataFrame()
+y_test = gender_df
+
+
+#le_sex = preprocessing.LabelEncoder()
+#le_sex.fit(x_train['Sex'])
+#x_train['Sex'] = le_sex.transform(x_train['Sex'])
+
+pipe.fit(x_train, y_train)
+##account for missing age
+#x_test['Age'] = x_test['Age'].astype('str')
+
+#x_test['Age'] = x_test['Age'].astype('float')
+x_test['Fare'].fillna(value=x_test['Fare'].mean(), inplace=True)
+accuracy_score(pipe.predict(x_test), y_test['Survived']) #.9186 accuracy score
