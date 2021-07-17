@@ -103,3 +103,6 @@ pipe.fit(x_train, y_train)
 #x_test['Age'] = x_test['Age'].astype('float')
 x_test['Fare'].fillna(value=x_test['Fare'].mean(), inplace=True)
 accuracy_score(pipe.predict(x_test), y_test['Survived']) #.9186 accuracy score
+df_submission = pd.DataFrame()
+df_submission['PassengerId'] = x_test['PassengerId']
+df_submission['Survived'] = pipe.predict(x_test)
